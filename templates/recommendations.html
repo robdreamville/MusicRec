@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendations</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container recommendations-page">
+        <h1>Music Recommendations</h1>
+        <form action="{{ url_for('start_over') }}" method="get">
+            <button type="submit" class="button_artist">Start Over</button>
+        </form>
+        <ul class="recommendations-list">
+            {% for recommendation in recommendation_data %}
+                <li class="recommendation-item">
+                    <p class="song-info">{{ recommendation['song_name'] }} x {{ recommendation['artist_name'] }}</p>
+                    <a class="listen-link" href="{{ recommendation['song_url'] }}" target="_blank">Listen on Spotify</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

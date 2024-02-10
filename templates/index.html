@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendations</title>
+    <!-- Pre-render the Genres page -->
+<!--    <link rel="prerender" href="/genres">
+
+    &lt;!&ndash; Prefetch resources for faster loading &ndash;&gt;
+
+    <link rel="prefetch" href="/artists">
+    <link rel="prefetch" href="/recommendations">-->
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <script>
+        function selectMood(mood) {
+            // Set the selected mood to the hidden input field
+            document.getElementById('selectedMood').value = mood;
+
+            // Automatically submit the form
+            document.getElementById('moodForm').submit();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to JbTunez</h1>
+        <form id="moodForm" action="{{ url_for('index') }}" method="post" onsubmit="return validateForm()">
+            <label for="username">Enter your username:</label>
+            <input type="text" name="username" required>
+
+            <label>Select your mood:</label>
+            <div>
+                <button type="button" onclick="selectMood('happy')">Happy</button>
+                <button type="button" onclick="selectMood('sad')">Sad</button>
+                <button type="button" onclick="selectMood('angry')">Angry</button>
+                <button type="button" onclick="selectMood('excited')">Excited</button>
+                <button type="button" onclick="selectMood('chill')">Chill</button>
+            </div>
+
+            <!-- Hidden input field to store the selected mood -->
+            <input type="hidden" id="selectedMood" name="mood">
+
+            <!-- No "Continue" button needed -->
+
+        </form>
+    </div>
+
+    <!-- Add your script imports here -->
+    <script>
+        function validateForm() {
+            var username = document.getElementById("username").value;
+            if (username.trim() === "") {
+                alert("Please enter your username.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add your head content here -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendations</title>
+
+    <!-- Prefetch resources for faster loading -->
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container artist_page">
+        <h1 class="h1 artist_page">Select Your Top Artists</h1>
+        <form id="artistForm" action="{{ url_for('artists') }}" method="post">
+            {% for genre, artists in user.top_artist_per_genre_details.items() %}
+                <div class="genre-column">
+                    <h2>{{ genre }}</h2>
+                    {% for artist in artists %}
+                        <div class="form-check">
+                            <button class="artist-button" type="button" data-value="{{ artist.name }} | {{ genre }}" onclick="selectArtist(this)">
+                                <img src="{{ artist.cover_image_url }}" alt="{{ artist.name }} cover">
+                                <span>{{ artist.name }}</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <input type="hidden" name="selected_artists" id="selected_artists" value="">
+            <div class="button-container">
+                <button type="submit" class="button_artist">Get Recommendations</button>
+            </div>
+        </form>
+        <div class="button-container">
+            <form action="{{ url_for('start_over') }}" method="get">
+                <button type="submit" class="button_artist">Start Over</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add your script imports here -->
+
+    <script>
+        function selectArtist(button) {
+            const selectedArtists = document.getElementById('selected_artists');
+            selectedArtists.value = button.dataset.value;
+
+            // Toggle the 'selected' class on the button
+            button.classList.toggle('selected');
+        }
+    </script>
+
+</body>
+</html>

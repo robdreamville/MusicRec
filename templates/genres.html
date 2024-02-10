@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendations</title>
+
+    <!-- Prefetch resources for faster loading -->
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container genres-page">
+        <h1><span class="greeting">Hey {{user.name}}</span> Choose Your Top Genres</h1>
+        <form id="genresForm" action="{{ url_for('genres') }}" method="post">
+            <div class="genre-buttons genre-columns">
+                {% for genre in preset_genres %}
+                    <button class="genre-button" type="button" data-value="{{ genre }}" onclick="toggleGenre(this)">
+                        {{ genre }}
+                    </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="selected_genres" id="selected_genres" value="">
+            <button type="submit" class="button_artist">Select Artists</button>
+        </form>
+        <form action="{{ url_for('start_over') }}" method="get">
+            <button type="submit" class="button_artist">Start Over</button>
+        </form>
+    </div>
+
+    <!-- Add your script imports here -->
+
+    <script>
+    function toggleGenre(button) {
+        button.classList.toggle('selected');
+        updateSelectedGenres();
+    }
+
+    function updateSelectedGenres() {
+        const selectedGenres = Array.from(document.querySelectorAll('.genre-button.selected')).map(button => button.dataset.value);
+        document.getElementById('selected_genres').value = selectedGenres.join(',');
+    }
+    </script>
+</body>
+</html>
