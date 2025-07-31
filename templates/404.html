@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - JbTunez</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: rgba(72, 161, 172, 1);
+            margin: 0;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+        .error-message {
+            font-size: 1.5rem;
+            color: #b2b6c2;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .error-description {
+            font-size: 1rem;
+            color: rgba(147, 158, 124, 0.8);
+            margin-bottom: 30px;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+        .navigation-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-button {
+            background-color: rgba(147, 158, 124, 0.8);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover {
+            background-color: rgba(72, 161, 172, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-code">404</h1>
+        <h2 class="error-message">Oops! This beat wasn't found</h2>
+        <p class="error-description">
+            Looks like this page got lost in the music. Don't worry, we can help you find your way back to the perfect playlist!
+        </p>
+        <div class="navigation-links">
+            <a href="{{ url_for('index') }}" class="nav-button">🏠 Home</a>
+            <a href="{{ url_for('start_over') }}" class="nav-button">🎵 Start Fresh</a>
+            <a href="javascript:history.back()" class="nav-button">⬅️ Go Back</a>
+        </div>
+    </div>
+</body>
+</html>

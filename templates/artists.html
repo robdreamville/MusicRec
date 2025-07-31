@@ -1,56 +1,425 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Add your head content here -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Recommendations</title>
-
-    <!-- Prefetch resources for faster loading -->
-
-
+    <title>Select Your Artists - JbTunez</title>
+    <meta name="description" content="Choose your favorite artists to personalize your music recommendations.">
+    
+    <link rel="prefetch" href="{{ url_for('recommendations') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    
+    <style>
+        .artist-page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .selected-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(72, 161, 172, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .genres-container {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .genre-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .genre-title {
+            color: rgba(72, 161, 172, 1);
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .artists-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .artist-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .artist-card:hover {
+            background: rgba(72, 161, 172, 0.3);
+            border-color: rgba(72, 161, 172, 1);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(72, 161, 172, 0.3);
+        }
+        
+        .artist-card.selected {
+            background: rgba(72, 161, 172, 0.8);
+            border-color: rgba(72, 161, 172, 1);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(72, 161, 172, 0.4);
+        }
+        
+        .artist-card.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: rgba(72, 161, 172, 1);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .artist-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px auto;
+            display: block;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .artist-card:hover .artist-image {
+            border-color: rgba(72, 161, 172, 1);
+            transform: scale(1.1);
+        }
+        
+        .artist-name {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background-color: rgba(147, 158, 124, 0.8);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            min-width: 180px;
+        }
+        
+        .action-button:hover {
+            background-color: rgba(72, 161, 172, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 161, 172, 0.3);
+        }
+        
+        .action-button:disabled {
+            background-color: rgba(100, 100, 100, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .primary-button {
+            background-color: rgba(72, 161, 172, 1);
+        }
+        
+        .secondary-button {
+            background-color: rgba(147, 158, 124, 0.6);
+        }
+        
+        .instructions {
+            text-align: center;
+            color: rgba(147, 158, 124, 0.9);
+            font-size: 16px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid rgba(72, 161, 172, 1);
+        }
+        
+        @media (max-width: 768px) {
+            .artists-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            .artist-image {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container artist_page">
-        <h1 class="h1 artist_page">Select Your Top Artists</h1>
-        <form id="artistForm" action="{{ url_for('artists') }}" method="post">
-            {% for genre, artists in user.top_artist_per_genre_details.items() %}
-                <div class="genre-column">
-                    <h2>{{ genre }}</h2>
-                    {% for artist in artists %}
-                        <div class="form-check">
-                            <button class="artist-button" type="button" data-value="{{ artist.name }} | {{ genre }}" onclick="selectArtist(this)">
-                                <img src="{{ artist.cover_image_url }}" alt="{{ artist.name }} cover">
-                                <span>{{ artist.name }}</span>
-                            </button>
-                        </div>
-                    {% endfor %}
+    <div class="artist-page-container">
+        <div class="selected-counter" id="selectedCounter">
+            Selected: <span id="selectedCount">0</span> artists
+        </div>
+        
+        <div class="page-header">
+            <h1>Select Your Favorite Artists</h1>
+            {% if user and user.name %}
+                <div class="user-info">
+                    <p>Hey <strong>{{ user.name }}</strong>! 🎵 Choose artists that match your <strong>{{ session.user_data.mood }}</strong> mood</p>
                 </div>
-            {% endfor %}
-            <input type="hidden" name="selected_artists" id="selected_artists" value="">
-            <div class="button-container">
-                <button type="submit" class="button_artist">Get Recommendations</button>
+            {% endif %}
+        </div>
+        
+        <div class="instructions">
+            💡 <strong>Tip:</strong> Select multiple artists from different genres to get more diverse recommendations!
+        </div>
+        
+        <form id="artistForm" action="{{ url_for('artists') }}" method="post">
+            <div class="genres-container">
+                {% for genre, artists in user.top_artist_per_genre_details.items() %}
+                    <div class="genre-section">
+                        <h2 class="genre-title">{{ genre.title() }}</h2>
+                        <div class="artists-grid">
+                            {% for artist in artists %}
+                                <div class="artist-card" data-artist-info="{{ artist.name }}|{{ genre }}">
+                                    {% if artist.cover_image_url %}
+                                        <img src="{{ artist.cover_image_url }}" 
+                                             alt="{{ artist.name }}" 
+                                             class="artist-image"
+                                             loading="lazy"
+                                             onerror="this.style.display='none'">
+                                    {% else %}
+                                        <div class="artist-image" style="background: rgba(72, 161, 172, 0.3); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                            🎤
+                                        </div>
+                                    {% endif %}
+                                    <p class="artist-name">{{ artist.name }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Hidden inputs for selected artists -->
+            <div id="selectedArtistsInputs"></div>
+            
+            <div class="action-buttons">
+                <button type="submit" id="getRecommendationsBtn" class="action-button primary-button" disabled>
+                    🎵 Get My Recommendations
+                </button>
+                <a href="{{ url_for('genres') }}" class="action-button secondary-button">
+                    ⬅️ Back to Genres
+                </a>
+                <a href="{{ url_for('start_over') }}" class="action-button secondary-button">
+                    🔄 Start Over
+                </a>
             </div>
         </form>
-        <div class="button-container">
-            <form action="{{ url_for('start_over') }}" method="get">
-                <button type="submit" class="button_artist">Start Over</button>
-            </form>
-        </div>
     </div>
 
-    <!-- Add your script imports here -->
-
     <script>
-        function selectArtist(button) {
-            const selectedArtists = document.getElementById('selected_artists');
-            selectedArtists.value = button.dataset.value;
-
-            // Toggle the 'selected' class on the button
-            button.classList.toggle('selected');
+        let selectedArtists = new Set();
+        
+        // Initialize artist selection
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to all artist cards
+            document.querySelectorAll('.artist-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    toggleArtistSelection(this);
+                });
+            });
+            
+            updateUI();
+        });
+        
+        function toggleArtistSelection(card) {
+            const artistInfo = card.dataset.artistInfo;
+            
+            if (selectedArtists.has(artistInfo)) {
+                // Deselect artist
+                selectedArtists.delete(artistInfo);
+                card.classList.remove('selected');
+            } else {
+                // Select artist
+                selectedArtists.add(artistInfo);
+                card.classList.add('selected');
+            }
+            
+            updateUI();
         }
+        
+        function updateUI() {
+            const count = selectedArtists.size;
+            
+            // Update counter
+            document.getElementById('selectedCount').textContent = count;
+            
+            // Update submit button
+            const submitBtn = document.getElementById('getRecommendationsBtn');
+            if (count > 0) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = `🎵 Get Recommendations (${count} artists)`;
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '🎵 Get My Recommendations';
+            }
+            
+            // Update hidden inputs
+            updateHiddenInputs();
+        }
+        
+        function updateHiddenInputs() {
+            const container = document.getElementById('selectedArtistsInputs');
+            container.innerHTML = '';
+            
+            selectedArtists.forEach(artistInfo => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_artists';
+                input.value = artistInfo;
+                container.appendChild(input);
+            });
+        }
+        
+        // Form submission with loading state
+        document.getElementById('artistForm').addEventListener('submit', function(e) {
+            if (selectedArtists.size === 0) {
+                e.preventDefault();
+                alert('Please select at least one artist to continue.');
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('getRecommendationsBtn');
+            submitBtn.innerHTML = '🎵 Generating Recommendations...';
+            submitBtn.disabled = true;
+            
+            // Add loading overlay (reuse from index page)
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.8); display: flex;
+                justify-content: center; align-items: center; z-index: 2000;
+            `;
+            loadingOverlay.innerHTML = `
+                <div style="text-align: center; color: white;">
+                    <div style="width: 50px; height: 50px; border: 3px solid rgba(72, 161, 172, 0.3);
+                               border-top: 3px solid rgba(72, 161, 172, 1); border-radius: 50%;
+                               animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="margin-top: 20px; font-size: 18px;">Creating your personalized playlist...</p>
+                </div>
+                <style>
+                    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                </style>
+            `;
+            document.body.appendChild(loadingOverlay);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && selectedArtists.size > 0) {
+                document.getElementById('artistForm').submit();
+            } else if (e.key === 'Escape') {
+                // Clear all selections
+                selectedArtists.clear();
+                document.querySelectorAll('.artist-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                updateUI();
+            }
+        });
+        
+        // Add select all functionality for each genre
+        document.querySelectorAll('.genre-title').forEach(title => {
+            title.style.cursor = 'pointer';
+            title.title = 'Double-click to select all artists in this genre';
+            
+            title.addEventListener('dblclick', function() {
+                const genreSection = this.closest('.genre-section');
+                const artistCards = genreSection.querySelectorAll('.artist-card');
+                
+                // Check if all artists in this genre are selected
+                const allSelected = Array.from(artistCards).every(card => 
+                    selectedArtists.has(card.dataset.artistInfo)
+                );
+                
+                artistCards.forEach(card => {
+                    const artistInfo = card.dataset.artistInfo;
+                    if (allSelected) {
+                        // Deselect all
+                        selectedArtists.delete(artistInfo);
+                        card.classList.remove('selected');
+                    } else {
+                        // Select all
+                        selectedArtists.add(artistInfo);
+                        card.classList.add('selected');
+                    }
+                });
+                
+                updateUI();
+            });
+        });
     </script>
-
 </body>
 </html>
