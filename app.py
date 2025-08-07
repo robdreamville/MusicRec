@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from User import User
 import logging
@@ -144,20 +147,19 @@ def artists():
                 return render_template('artists.html', user=user, top_artist_details=user.top_artist_per_genre_details)
 
             # Process selected artists
-            for artist in selected_artists:
-                if '|' in artist:
-                    artist_name = artist.split('|')[0].strip()
-                    user.add_artist(artist_name)
+            for artist_info in selected_artists:
+                parts = artist_info.split('|')
+                if len(parts) == 3:
+                    artist_id, artist_name, _ = parts
+                    user.add_artist(artist_id.strip(), artist_name.strip())
 
             if not user.artists:
                 flash('No valid artists selected. Please try again.', 'error')
                 return render_template('artists.html', user=user, top_artist_details=user.top_artist_per_genre_details)
 
-            user.set_artist_ids()
-
             # Update session
             session['user_data']['artists'] = user.artists
-            session['user_data']['artist_ids'] = user.artist_ids
+            session['user_data']['artist_ids'] = user.get_artist_ids()
 
             app.logger.info(f"User {user.name} selected {len(user.artists)} artists")
             return redirect(url_for('recommendations'))

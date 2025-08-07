@@ -241,7 +241,7 @@
                         <h2 class="genre-title">{{ genre.title() }}</h2>
                         <div class="artists-grid">
                             {% for artist in artists %}
-                                <div class="artist-card" data-artist-info="{{ artist.name }}|{{ genre }}">
+                                <div class="artist-card" data-artist-info="{{ artist.id }}|{{ artist.name }}|{{ genre }}">
                                     {% if artist.cover_image_url %}
                                         <img src="{{ artist.cover_image_url }}" 
                                              alt="{{ artist.name }}" 

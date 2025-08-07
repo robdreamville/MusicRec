@@ -2,6 +2,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
 import logging
+from dotenv import load_dotenv
+load_dotenv()
 from typing import List, Dict, Optional
 
 # Set up logging
@@ -234,7 +236,7 @@ def get_artist_details(artist_id: str) -> Optional[Dict[str, str]]:
         artist_id: Spotify artist ID
         
     Returns:
-        Dictionary with artist name and cover image URL, or None if error
+        Dictionary with artist name, ID, and cover image URL, or None if error
     """
     try:
         artist_details = sp.artist(artist_id)
@@ -252,6 +254,7 @@ def get_artist_details(artist_id: str) -> Optional[Dict[str, str]]:
             cover_image_url = images[0]['url']
 
         result = {
+            'id': artist_id,
             'name': artist_name,
             'cover_image_url': cover_image_url
         }

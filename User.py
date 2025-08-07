@@ -66,7 +66,7 @@ class User:
         """Initialize a new User instance"""
         self.name: Optional[str] = name
         self.mood: Optional[str] = None
-        self.artists: List[str] = []
+        self.artists: List[Dict[str, str]] = []
         self.tracks: List[Dict[str, str]] = []
         self.genres: List[str] = []
         self.mood_scores: Optional[Dict] = None
@@ -136,40 +136,32 @@ class User:
             logger.warning(f"Invalid mood: {mood}")
             return False
 
-    def get_artists(self) -> List[str]:
+    def get_artists(self) -> List[Dict[str, str]]:
         """Get user's selected artists"""
         return self.artists.copy()
 
-    def add_artist(self, artist: str) -> bool:
+    def add_artist(self, artist_id: str, artist_name: str) -> bool:
         """Add an artist to user's preferences"""
-        if not artist or not artist.strip():
+        if not artist_id or not artist_name:
             return False
             
-        artist_clean = artist.strip()
-        if artist_clean not in self.artists:
-            self.artists.append(artist_clean)
-            logger.info(f"Added artist: {artist_clean}")
+        if artist_id not in [artist['id'] for artist in self.artists]:
+            self.artists.append({'id': artist_id, 'name': artist_name})
+            logger.info(f"Added artist: {artist_name} ({artist_id})")
             return True
         else:
-            logger.warning(f"Artist {artist_clean} already selected")
+            logger.warning(f"Artist {artist_name} already selected")
             return True
 
-    def remove_artist(self, artist: str) -> bool:
+    def remove_artist(self, artist_id: str) -> bool:
         """Remove an artist from user's preferences"""
-        artist_clean = artist.strip()
-        if artist_clean in self.artists:
-            self.artists.remove(artist_clean)
-            logger.info(f"Removed artist: {artist_clean}")
+        initial_len = len(self.artists)
+        self.artists = [artist for artist in self.artists if artist['id'] != artist_id]
+
+        if len(self.artists) < initial_len:
+            logger.info(f"Removed artist with ID: {artist_id}")
             return True
         return False
-
-    def add_multiple_artists(self, artists: List[str]) -> int:
-        """Add multiple artists and return count of successfully added"""
-        added_count = 0
-        for artist in artists:
-            if self.add_artist(artist):
-                added_count += 1
-        return added_count
 
     def get_tracks(self) -> List[Dict[str, str]]:
         """Get user's selected tracks"""
@@ -187,22 +179,9 @@ class User:
             return True
         return False
 
-    def set_artist_ids(self) -> None:
-        """Convert artist names to Spotify IDs with error handling"""
-        self.artist_ids = []
-        for artist in self.artists:
-            try:
-                artist_id = get_artist_id(artist)
-                if artist_id:
-                    self.artist_ids.append(artist_id)
-                    logger.info(f"Found ID for artist: {artist}")
-                else:
-                    logger.warning(f"Could not find ID for artist: {artist}")
-            except Exception as e:
-                logger.error(f"Error getting ID for artist {artist}: {e}")
-
     def get_artist_ids(self) -> List[str]:
         """Get Spotify artist IDs"""
+        self.artist_ids = [artist['id'] for artist in self.artists]
         return self.artist_ids.copy()
 
     def set_track_ids(self) -> None:
