@@ -3,60 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Recommendations</title>
-    <!-- Pre-render the Genres page -->
-<!--    <link rel="prerender" href="/genres">
-
-    &lt;!&ndash; Prefetch resources for faster loading &ndash;&gt;
-
-    <link rel="prefetch" href="/artists">
-    <link rel="prefetch" href="/recommendations">-->
-
+    <title>JbTunez - Your Personalized Music Journey</title>
+    <meta name="description" content="Discover your next favorite song with AI-powered music recommendations based on your mood and taste.">
+    
+    <!-- Prefetch for better performance -->
+    <link rel="prefetch" href="{{ url_for('genres') }}">
+    <link rel="prefetch" href="{{ url_for('static', filename='main.css') }}">
+    
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-    <script>
-        function selectMood(mood) {
-            // Set the selected mood to the hidden input field
-            document.getElementById('selectedMood').value = mood;
-
-            // Automatically submit the form
-            document.getElementById('moodForm').submit();
+    
+    <style>
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
         }
-    </script>
+        .flash-message {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+        .flash-success {
+            background-color: rgba(72, 161, 172, 0.9);
+            color: white;
+            border-left: 4px solid rgba(72, 161, 172, 1);
+        }
+        .flash-error {
+            background-color: rgba(220, 53, 69, 0.9);
+            color: white;
+            border-left: 4px solid #dc3545;
+        }
+        .flash-warning {
+            background-color: rgba(255, 193, 7, 0.9);
+            color: #212529;
+            border-left: 4px solid #ffc107;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .app-subtitle {
+            color: rgba(147, 158, 124, 0.8);
+            font-size: 18px;
+            margin: 10px 0 30px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .username-group {
+            margin-bottom: 30px;
+        }
+        .username-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #b2b6c2;
+            font-weight: 600;
+        }
+        .username-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .username-input:focus {
+            outline: none;
+            border-color: rgba(72, 161, 172, 1);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(72, 161, 172, 0.3);
+        }
+        .username-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .mood-section {
+            margin-bottom: 30px;
+        }
+        .mood-label {
+            display: block;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #b2b6c2;
+            font-weight: 600;
+            text-align: center;
+        }
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .mood-button {
+            padding: 15px 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .mood-button:hover {
+            background: rgba(72, 161, 172, 0.8);
+            border-color: rgba(72, 161, 172, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 161, 172, 0.3);
+        }
+        .mood-button.selected {
+            background: rgba(72, 161, 172, 1);
+            border-color: rgba(72, 161, 172, 1);
+            transform: scale(1.05);
+        }
+        
+        .form-validation {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ff6b6b;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .form-validation.show {
+            opacity: 1;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(72, 161, 172, 0.3);
+            border-top: 3px solid rgba(72, 161, 172, 1);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to JbTunez</h1>
-        <form id="moodForm" action="{{ url_for('index') }}" method="post" onsubmit="return validateForm()">
-            <label for="username">Enter your username:</label>
-            <input type="text" name="username" required>
-
-            <label>Select your mood:</label>
-            <div>
-                <button type="button" onclick="selectMood('happy')">Happy</button>
-                <button type="button" onclick="selectMood('sad')">Sad</button>
-                <button type="button" onclick="selectMood('angry')">Angry</button>
-                <button type="button" onclick="selectMood('excited')">Excited</button>
-                <button type="button" onclick="selectMood('chill')">Chill</button>
-            </div>
-
-            <!-- Hidden input field to store the selected mood -->
-            <input type="hidden" id="selectedMood" name="mood">
-
-            <!-- No "Continue" button needed -->
-
-        </form>
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; color: inherit; font-size: 18px; cursor: pointer;">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
 
-    <!-- Add your script imports here -->
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center; color: white;">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 20px; font-size: 18px;">Tuning your musical journey...</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome to JbTunez</h1>
+            <p class="app-subtitle">Discover your next favorite song with AI-powered recommendations</p>
+        </div>
+        
+        <div class="form-section">
+            <form id="moodForm" action="{{ url_for('index') }}" method="post">
+                <div class="username-group">
+                    <label for="username">What should we call you?</label>
+                    <input 
+                        type="text" 
+                        id="username"
+                        name="username" 
+                        class="username-input"
+                        placeholder="Enter your name..."
+                        maxlength="50"
+                        required
+                        autocomplete="given-name"
+                    >
+                </div>
+
+                <div class="mood-section">
+                    <label class="mood-label">How are you feeling today?</label>
+                    <div class="mood-grid">
+                        <button type="button" class="mood-button" data-mood="happy">
+                            😊 Happy
+                        </button>
+                        <button type="button" class="mood-button" data-mood="sad">
+                            😢 Sad
+                        </button>
+                        <button type="button" class="mood-button" data-mood="angry">
+                            😠 Angry
+                        </button>
+                        <button type="button" class="mood-button" data-mood="excited">
+                            🤩 Excited
+                        </button>
+                        <button type="button" class="mood-button" data-mood="chill">
+                            😌 Chill
+                        </button>
+                    </div>
+                </div>
+
+                <input type="hidden" id="selectedMood" name="mood" required>
+                
+                <div class="form-validation" id="formValidation"></div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        function validateForm() {
-            var username = document.getElementById("username").value;
-            if (username.trim() === "") {
-                alert("Please enter your username.");
-                return false; // Prevent form submission
+        // Enhanced form handling with better UX
+        let selectedMood = null;
+        
+        // Mood selection handling
+        document.querySelectorAll('.mood-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove selected class from all buttons
+                document.querySelectorAll('.mood-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked button
+                this.classList.add('selected');
+                
+                // Store selected mood
+                selectedMood = this.dataset.mood;
+                document.getElementById('selectedMood').value = selectedMood;
+                
+                // Clear any validation messages
+                hideValidation();
+                
+                // Auto-submit after mood selection if username is filled
+                const username = document.getElementById('username').value.trim();
+                if (username && selectedMood) {
+                    setTimeout(() => {
+                        submitForm();
+                    }, 300); // Small delay for visual feedback
+                }
+            });
+        });
+        
+        // Username input handling
+        document.getElementById('username').addEventListener('input', function() {
+            const username = this.value.trim();
+            if (username && selectedMood) {
+                hideValidation();
             }
-            return true; // Allow form submission
+        });
+        
+        // Form submission with validation
+        function submitForm() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                showValidation('Please enter your name to continue');
+                document.getElementById('username').focus();
+                return false;
+            }
+            
+            if (!selectedMood) {
+                showValidation('Please select your current mood');
+                return false;
+            }
+            
+            // Show loading overlay
+            showLoading();
+            
+            // Submit form
+            document.getElementById('moodForm').submit();
+            return true;
         }
+        
+        // Validation message handling
+        function showValidation(message) {
+            const validation = document.getElementById('formValidation');
+            validation.textContent = message;
+            validation.classList.add('show');
+        }
+        
+        function hideValidation() {
+            const validation = document.getElementById('formValidation');
+            validation.classList.remove('show');
+        }
+        
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash-message').forEach(msg => {
+                msg.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitForm();
+            }
+        });
+        
+        // Focus username input on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+        });
     </script>
 </body>
 </html>

@@ -1,7 +1,115 @@
-*.pyc
-*.pyo
-__pycache__/
+# JbTunez - Git Ignore Configuration
+
+# Spotify API Credentials (SECURITY CRITICAL)
 spotify.py
+.env
+.env.local
+.env.production
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
 .venv/
+.ENV/
+
+# Flask
+instance/
+.webassets-cache
+*.log
+app.log
+
+# Session Data
+flask_session/
+
+# Testing
+.tox/
+.coverage
+.pytest_cache/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDEs
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Redis dumps
+dump.rdb
+
+# Node modules (if using npm for frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+*.tmp
+*.temp
 .cache/
+
+# Docker
+.dockerignore
+Dockerfile.dev
+docker-compose.override.yml
+
+# Heroku
+.slugignore
+
+# Analytics and monitoring
+.sentry-*
